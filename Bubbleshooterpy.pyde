@@ -16,7 +16,7 @@ class Grid:
         return GameOver
             
 
-ColorsInGame = [1, 2, 3, 4, 5]
+ColorsInGame = [1, 2, 3, 4, 5, 6]
 
 
 def setup():
@@ -41,33 +41,66 @@ def draw():
 def Initialize():
     for row in range(9):
         for val in range(9):
-            Grid.gridList[row][val] = random.randint(1,5)
+            Grid.gridList[row][val] = random.randint(1,6)
             
     #Code for initializing squares
     
     
+    
+    
+    
+    
+    for row in range(9):
+        for val in range(9):
+            if Grid.gridList[row][val] == 1:
+                #Red = ffef161a
+            
+            elif Grid.gridList[row][val] == 2:
+                #Green = ff0f00bf
+                
+            elif Grid.gridList[row][val] == 3:
+                #Yellow = fffeff00
+                
+            elif Grid.gridList[row][val] == 4:
+                #Purple = ffe500e6
+                
+            elif Grid.gridList[row][val] == 5:
+                #Dark Blue = ff1e00fd
+                
+            elif Grid.gridList[row][val] == 6:
+                #Light Blue = ff02fafa
+            
+            else:
+                raise Exception("Encountered value" + Grid.gridList[row][val] + "while initializing")
+            
+                                    
     
             
 
 def NewRow():
-    Grid.gridList.pop()
-    tempList= [0] * 9
+    #Checking if player is GameOver
+    GameOver = False
     for val in range(9):
-        tempList[val] = random.choice(ColorsInGame)
+        if Grid.gridList[15][val] != 0:
+            GameOverScreen()
+            GameOver = True
+            break
+    
+    if !GameOver:
+        Grid.gridList.pop()
+        tempList= [0] * 9
+        for val in range(9):
+            tempList[val] = random.choice(ColorsInGame)
+            
+        Grid.gridList.insert(0, tempList)
         
-    Grid.gridList.insert(0, tempList)
-        
-    if Grid().GameOverCheck:
-        GameOverScreen()
-        
-        
-        
-        
-    #Code for initializing squares
+    
+        #Code for initializing squares
     
     
     
 def GameOverScreen():
     pass
+    #Code for Game Over screen
     
             

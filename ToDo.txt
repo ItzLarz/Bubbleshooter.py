@@ -1,0 +1,4 @@
+* Game Over screen
+* Initializing squares
+* Shooting Mechanism
+* Checking if squares of same color are next to eachother
