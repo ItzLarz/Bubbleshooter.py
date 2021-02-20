@@ -59,14 +59,9 @@ def setup():
                 
 #Loop
 def draw():
-  if keyPressed == True:
-    NewRow()
-    time.sleep(0.15)
+    Shoot()
     
 
-    
-
-#nice
 
 #Functions
 
@@ -84,48 +79,63 @@ def Initialize():
             if Grid.gridList[row][val] == 1:
                 #Red = ffef161a
                 fill(unhex("ffef161a"))
-                square(30*val+15+val*5, 30*row+15+row*5, 30)
+                square(30*val+17+val*5, 30*row+17+row*5, 30)
             
             elif Grid.gridList[row][val] == 2:
                 #Green = ff00da00
                 fill(unhex("ff00da00"))
-                square(30*val+15+val*5, 30*row+15+row*5, 30)
+                square(30*val+17+val*5, 30*row+17+row*5, 30)
                 
             elif Grid.gridList[row][val] == 3:
                 #Yellow = fffeff00
                 fill(unhex("fffeff00"))
-                square(30*val+15+val*5, 30*row+15+row*5, 30)
+                square(30*val+17+val*5, 30*row+17+row*5, 30)
                 
             elif Grid.gridList[row][val] == 4:
                 #Purple = ffe500e6
                 fill(unhex("ffe500e6"))
-                square(30*val+15+val*5, 30*row+15+row*5, 30)
+                square(30*val+17+val*5, 30*row+17+row*5, 30)
                 
             elif Grid.gridList[row][val] == 5:
                 #Dark Blue = ff1e00fd
                 fill(unhex("ff1e00fd"))
-                square(30*val+15+val*5, 30*row+15+row*5, 30)
+                square(30*val+17+val*5, 30*row+17+row*5, 30)
                 
             elif Grid.gridList[row][val] == 6:
                 #Light Blue = ff02fafa
                 fill(unhex("ff02fafa"))
-                square(30*val+15+val*5, 30*row+15+row*5, 30)
+                square(30*val+17+val*5, 30*row+17+row*5, 30)
             
             else:
                 raise Exception("Encountered value " + str(Grid.gridList[row][val]) + " while initializing")
             
-                                    
-    
+
+def Shoot():
+    fill(0)
+    square(275, 600, 30)
+    if mousePressed == True:
+        x = mouseX
+        y = mouseY
+        if y < 600 and y > 10 and x > 10 and x < 580:
+            fill(0)
+            #square((max(mouseX, 275)-min(mouseX, 275))/2+min(mouseX, 275), (600-mouseY)/2+mouseY, 1)
+                
+            
+        
+        
+        
+        
+
             
 
 def NewRow():
     #Checking if player is GameOver
-     GameOver = False
-     for val in range(16):
-         if Grid.gridList[15][val] != 0:
-             GameOverScreen()
-             GameOver = True
-             break
+    GameOver = False
+    for val in range(16):
+        if Grid.gridList[15][val] != 0:
+            GameOverScreen()
+            GameOver = True
+            break
     
     if not GameOver:
         Grid.gridList.pop()
@@ -146,32 +156,32 @@ def NewRow():
                 elif Grid.gridList[row][val] == 1:
                     #Red = ffef161a
                     fill(unhex("ffef161a"))
-                    square(30*val+15+val*5, 30*row+15+row*5, 30)
+                    square(30*val+17+val*5, 30*row+17+row*5, 30)
                 
                 elif Grid.gridList[row][val] == 2:
                     #Green = ff00da00
                     fill(unhex("ff00da00"))
-                    square(30*val+15+val*5, 30*row+15+row*5, 30)
+                    square(30*val+17+val*5, 30*row+17+row*5, 30)
                     
                 elif Grid.gridList[row][val] == 3:
                     #Yellow = fffeff00
                     fill(unhex("fffeff00"))
-                    square(30*val+15+val*5, 30*row+15+row*5, 30)
+                    square(30*val+17+val*5, 30*row+17+row*5, 30)
                     
                 elif Grid.gridList[row][val] == 4:
                     #Purple = ffe500e6
                     fill(unhex("ffe500e6"))
-                    square(30*val+15+val*5, 30*row+15+row*5, 30)
+                    square(30*val+17+val*5, 30*row+17+row*5, 30)
                     
                 elif Grid.gridList[row][val] == 5:
                     #Dark Blue = ff1e00fd
                     fill(unhex("ff1e00fd"))
-                    square(30*val+15+val*5, 30*row+15+row*5, 30)
+                    square(30*val+17+val*5, 30*row+17+row*5, 30)
                     
                 elif Grid.gridList[row][val] == 6:
                     #Light Blue = ff02fafa
                     fill(unhex("ff02fafa"))
-                    square(30*val+15+val*5, 30*row+15+row*5, 30)
+                    square(30*val+17+val*5, 30*row+17+row*5, 30)
                 
                 else:
                     raise Exception("Encountered value " + str(Grid.gridList[row][val]) + " while initializing")
@@ -182,15 +192,16 @@ def NewRow():
 def CheckColorsInGame():
     CurrentColorsInGame = []
     
-    for row in range(17):
-            for val in range(16):
-                if Grid.gridList[row][val] == 0:
-                    pass
+    for row in range(16):
+        for val in range(16):
+            if Grid.gridList[row][val] == 0:
+                pass
 
-                elif not CurrentColorsInGame.contains(Grid.gridList[row][val]):
-                     CurrentColorsInGame.append(Grid.gridList[row][val])
-
-
+            elif not CurrentColorsInGame.contains(Grid.gridList[row][val]):
+                CurrentColorsInGame.append(Grid.gridList[row][val])
+        
+        ColorsInGame.clear()
+        ColorsInGame.extend(CurrentColorsInGame)
 
 
 
