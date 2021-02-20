@@ -16,10 +16,10 @@ eliminated
 
 
 
-
-row 0: rij -1 wordt rij -2
-row 1: rij -2 wordt rij -3
-row 2: rij -3 wordt rij -4
-row 3: rij -4 wordt rij -5
-
+Extras:
+scoreboard button + scorefile
+pause button + pausescreen
+score screen at game over + play again button
+restart button
+sound button + soundtrack?
 
