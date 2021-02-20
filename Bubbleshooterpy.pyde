@@ -16,7 +16,7 @@ class Grid:
         return GameOver
             
 
-ColorsInGame = ("red", "green", "yellow", "blue", "purple")
+ColorsInGame = [1, 2, 3, 4, 5]
 
 
 def setup():
@@ -53,7 +53,7 @@ def NewRow():
     Grid.gridList.pop()
     tempList= [0] * 9
     for val in range(9):
-        tempList[val] = random.randint(1,5)
+        tempList[val] = random.choice(ColorsInGame)
         
     Grid.gridList.insert(0, tempList)
         
