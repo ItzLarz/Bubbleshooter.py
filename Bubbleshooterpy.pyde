@@ -6,7 +6,7 @@ import time
 ColorsInGame = [1, 2, 3, 4, 5, 6]
 position = PVector(290, 630)
 bubbles = []
-bubbleFlySpeed = 5
+bubbleFlySpeed = 10
 fireSpeed = 1
 hit = False
 x = 0
@@ -57,12 +57,17 @@ class Bubble:
         self.w = tempW
         self.speedX = tempSpeedX
         self.speedY = tempSpeedY
+        self.directionX = 1
+    
+    def ChangeDirection(self):
+        if self.x < 27 or self.x > 560: 
+            self.directionX *= -1
         
-    def move(self):
-        self.x += self.speedX
+    def Move(self):
+        self.x += self.speedX * self.directionX
         self.y += self.speedY
         
-    def display(self):
+    def Display(self):
     
         fill(unhex("ffe500e6"))
         stroke(1)
@@ -113,8 +118,9 @@ def DrawBubble():
     popMatrix()
     
     for currentBubble in bubbles:
-        currentBubble.move()
-        currentBubble.display()
+        currentBubble.ChangeDirection()
+        currentBubble.Move()
+        currentBubble.Display()
 
 
 #Initializing at the start of a game
