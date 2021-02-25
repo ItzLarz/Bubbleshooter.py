@@ -7,12 +7,10 @@ ColorsInGame = [1, 2, 3, 4, 5, 6]
 position = PVector(290, 630)
 bubbles = []
 bubbleFlySpeed = 10
-fireSpeed = 1
-hit = False
-x = 0
-y = 0    
-ang = 0
 bubble = 1
+gameOver = False
+score = 69
+rowIndent = False
 
 #Making the grid
 gridList = [[0]*16 for i in range(16)]
@@ -26,30 +24,38 @@ def setup():
     clear()
     
     Start()
-    Initialize()
     
-
 
  
 #Loop
 def draw():
     global bubble
+    global gameOver
     background(255)
     Initialize()
     DrawBubble()
     if mousePressed:
-        Fire()
+        FireBubble()
         
     if keyPressed:
         if key == " ":
             bubble += 1
-        
-
-    
+        if key == "w":
+            NewRow()
+            time.sleep(0.1)
             
+    if gameOver:
+        GameOverScreen()
+        if keyPressed:
+            if key == "p":
+                gameOver = False
+                Start()
 
 
-#Shoot bubble class
+
+
+
+#Bubble class
 class Bubble:
     def __init__(self, tempX, tempY, tempSpeedX, tempSpeedY, tempW):
         self.x = tempX
@@ -59,23 +65,22 @@ class Bubble:
         self.speedY = tempSpeedY
         self.directionX = 1
     
+    #Function to bounce off walls
     def ChangeDirection(self):
         if self.x < 27 or self.x > 560: 
             self.directionX *= -1
-        
+
+    #Function to move bubble
     def Move(self):
         self.x += self.speedX * self.directionX
         self.y += self.speedY
-        
-    def Display(self):
     
+    #Function to display bubble
+    def Display(self):
         fill(unhex("ffe500e6"))
         stroke(1)
         ellipse(self.x, self.y, self.w, self.w)
-        
-    
-        
-        
+
 
 
 
@@ -83,21 +88,106 @@ class Bubble:
 #Functions
 
 
-def OuterBubbles():
-    pass
+#Function to fill the grid at the start of a game
+def Start():
+    for row in range(9):
+        for val in range(16):
+            gridList[row][val] = random.randint(1, 6)
+            
+    for row in range(9, len(gridList)):
+        for val in range(16):
+            gridList[row][val] = 0
+      
+      
+
+#Function to initialize the game
+def Initialize():
+    global rowIndent
+    
+    strokeWeight(10)
+    stroke(unhex("ffc1c0ff"))
+    fill(255)
+    rect(4, 4, 595, 641)
+    
+    strokeWeight(1)
+    x = 10
+    while x < 580:
+        stroke(-(x+590>>1 & 1))
+        line(x, 590, x+5, 590)
+        x+=6
+        
+    fill(unhex("ffc1c0ff"))
+    strokeWeight(1)
+    stroke(unhex("ffc1c0ff"))
+    rect(595, 0, 224, 649)
+    
+    strokeWeight(1.3)    
+    stroke(0)
+    fill(0)
+    for row in range(16):
+        
+        if rowIndent:
+            global rowWidth
+            rowWidth = 47
+            rowIndent = False
+            
+        else:
+            global rowWidth
+            rowWidth = 30
+            rowIndent = True
+        
+        
+        for val in range(16):
+            if gridList[row][val] == 0:
+                pass
+        
+            elif gridList[row][val] == 1:
+                #Red = ffef161a
+                fill(unhex("ffef161a"))
+                circle(35*val+rowWidth, 35*row+30, 30)
+            
+            elif gridList[row][val] == 2:
+                #Green = ff00da00
+                fill(unhex("ff00da00"))
+                circle(35*val+rowWidth, 35*row+30, 30)
+                
+            elif gridList[row][val] == 3:
+                #Yellow = fffeff00
+                fill(unhex("fffeff00"))
+                circle(35*val+rowWidth, 35*row+30, 30)
+                
+            elif gridList[row][val] == 4:
+                #Purple = ffe500e6
+                fill(unhex("ffe500e6"))
+                circle(35*val+rowWidth, 35*row+30, 30)
+                
+            elif gridList[row][val] == 5:
+                #Dark Blue = ff1e00fd
+                fill(unhex("ff1e00fd"))
+                circle(35*val+rowWidth, 35*row+30, 30)
+                
+            elif gridList[row][val] == 6:
+                #Light Blue = ff02fafa
+                fill(unhex("ff02fafa"))
+                circle(35*val+rowWidth, 35*row+30, 30)
+            
+            else:
+                raise Exception("Encountered value " + str(gridList[row][val]) + " while initializing")
+    
 
 
 
-def Fire():
+#Function to fire bubble
+def FireBubble():
     global bubble
     global bubbles
-    if bubble > 0:
-        bubble -= 1
-        xSpeed = 0
-        ySpeed = 0
-        mx = mouseX
-        my = mouseY
-        if my < 590 and my >= 10 and mx < 575 and mx >= 10:
+    xSpeed = 0
+    ySpeed = 0
+    mx = mouseX
+    my = mouseY
+    if my < 590 and my >= 10 and mx < 575 and mx >= 10:
+        if bubble > 0:
+            bubble -= 1
             angle = atan2(float(mouseY)-(position.y-15), float(mouseX)-(position.x-15));
             xSpeed = cos(angle)
             ySpeed = sin(angle)
@@ -108,7 +198,8 @@ def Fire():
             bubbles.append(Bubble(position.x-15, position.y-15, xSpeed, ySpeed, 30))
 
 
-#Drawing shoot bubble
+
+#Function to draw bubble
 def DrawBubble():
     pushMatrix()
     translate(position.x, position.y)
@@ -123,89 +214,23 @@ def DrawBubble():
         currentBubble.Display()
 
 
-#Initializing at the start of a game
-def Start():
-    for row in range(9):
-        for val in range(16):
-            gridList[row][val] = random.randint(1,6)
-      
+
+#Function to create collision
+def OuterBubbles():
+    pass
 
 
-def Initialize():
-    
-    strokeWeight(10)
-    stroke(unhex("ffc1c0ff"))
-    fill(255)
-    rect(4,4,580,640)
-    
-    strokeWeight(1)
-    x = 10
-    while x < 580:
-        stroke(-(x+590>>1 & 1))
-        line(x, 590, x+5, 590)
-        x+=6
-        
-    fill(unhex("ffc1c0ff"))
-    strokeWeight(1)
-    stroke(unhex("ffc1c0ff"))
-    rect(575,0,224,649)
-    
-    strokeWeight(1.3)    
-    stroke(0)
-    fill(0)
-    for row in range(16):
-            for val in range(16):
-                if gridList[row][val] == 0:
-                    pass
-            
-                elif gridList[row][val] == 1:
-                    #Red = ffef161a
-                    fill(unhex("ffef161a"))
-                    circle(30*val+30+val*5, 30*row+30+row*5, 30)
-                
-                elif gridList[row][val] == 2:
-                    #Green = ff00da00
-                    fill(unhex("ff00da00"))
-                    circle(30*val+30+val*5, 30*row+30+row*5, 30)
-                    
-                elif gridList[row][val] == 3:
-                    #Yellow = fffeff00
-                    fill(unhex("fffeff00"))
-                    circle(30*val+30+val*5, 30*row+30+row*5, 30)
-                    
-                elif gridList[row][val] == 4:
-                    #Purple = ffe500e6
-                    fill(unhex("ffe500e6"))
-                    circle(30*val+30+val*5, 30*row+30+row*5, 30)
-                    
-                elif gridList[row][val] == 5:
-                    #Dark Blue = ff1e00fd
-                    fill(unhex("ff1e00fd"))
-                    circle(30*val+30+val*5, 30*row+30+row*5, 30)
-                    
-                elif gridList[row][val] == 6:
-                    #Light Blue = ff02fafa
-                    fill(unhex("ff02fafa"))
-                    circle(30*val+30+val*5, 30*row+30+row*5, 30)
-                
-                else:
-                    raise Exception("Encountered value " + str(gridList[row][val]) + " while initializing")
-    
-            
-        
 
-            
-
+#Function to create new row in the grid
 def NewRow():
     #Checking if player is GameOver
-    GameOver = False
+    global gameOver
     for val in range(16):
         if gridList[15][val] != 0:
-            GameOverScreen()
-            GameOver = True
+            gameOver = True
             break
     
-    if not GameOver:
+    if not gameOver:
         gridList.pop()
         tempRow = [0] * 16
         for val in range(16):
@@ -213,9 +238,9 @@ def NewRow():
             
         gridList.insert(0, tempRow)
 
-    
 
 
+#Function to check which colors are still in the game
 def CheckColorsInGame():
     CurrentColorsInGame = []
     
@@ -232,8 +257,15 @@ def CheckColorsInGame():
 
 
 
+#Function to display the Game Over screen
 def GameOverScreen():
-    print("Game Over")
     #Code for Game Over screen
-    
-            
+    for fade in range(79):
+        background(0)
+        fill(fade, 0, 0)
+        textFont(loadFont("TimesNewRomanPSMT-48.vlw"), 60)
+        textAlign(CENTER, CENTER)
+        text("YOU DIED", width/2, height/2)
+        textFont(loadFont("TimesNewRomanPSMT-48.vlw"), 20)
+        textAlign(CENTER, CENTER)
+        text("(With a score of " + str(score) + ")", width/2, 400)
