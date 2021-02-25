@@ -65,21 +65,36 @@ class Bubble:
         self.speedY = tempSpeedY
         self.directionX = 1
     
+    
+    
+    #Function to detect if bubble is out of bounds    
+    def OutOfBounds(self):
+        if self.y < 15:
+            return True
+    
+    
+    
     #Function to bounce off walls
     def ChangeDirection(self):
-        if self.x < 27 or self.x > 560: 
+        if self.x < 27 or self.x > 575: 
             self.directionX *= -1
+
+
 
     #Function to move bubble
     def Move(self):
         self.x += self.speedX * self.directionX
         self.y += self.speedY
     
+    
+    
     #Function to display bubble
     def Display(self):
         fill(unhex("ffe500e6"))
         stroke(1)
         ellipse(self.x, self.y, self.w, self.w)
+        
+    
 
 
 
@@ -185,7 +200,7 @@ def FireBubble():
     ySpeed = 0
     mx = mouseX
     my = mouseY
-    if my < 590 and my >= 10 and mx < 575 and mx >= 10:
+    if my < 590 and my >= 10 and mx < 594 and mx >= 10:
         if bubble > 0:
             bubble -= 1
             angle = atan2(float(mouseY)-(position.y-15), float(mouseX)-(position.x-15));
@@ -209,9 +224,14 @@ def DrawBubble():
     popMatrix()
     
     for currentBubble in bubbles:
-        currentBubble.ChangeDirection()
-        currentBubble.Move()
-        currentBubble.Display()
+        if currentBubble.OutOfBounds():
+            bubbles.remove(currentBubble)
+        
+        else:
+            currentBubble.ChangeDirection()
+            currentBubble.Move()
+            currentBubble.Display()
+        
 
 
 
@@ -223,6 +243,8 @@ def OuterBubbles():
 
 #Function to create new row in the grid
 def NewRow():
+    global rowIndent
+    
     #Checking if player is GameOver
     global gameOver
     for val in range(16):
@@ -230,6 +252,7 @@ def NewRow():
             gameOver = True
             break
     
+    #Creating new row
     if not gameOver:
         gridList.pop()
         tempRow = [0] * 16
@@ -237,6 +260,12 @@ def NewRow():
             tempRow[val] = random.choice(ColorsInGame)
             
         gridList.insert(0, tempRow)
+    
+        if rowIndent:
+            rowIndent = False
+            
+        else:
+            rowIndent = True
 
 
 
