@@ -4,7 +4,7 @@ import time
 
 #Variables
 ColorsInGame = [1, 2, 3, 4, 5, 6]
-position = PVector(290, 630)
+position = PVector(302, 617)
 bubbles = []
 bubbleFlySpeed = 10
 bubble = 1
@@ -34,6 +34,7 @@ def draw():
     background(255)
     Initialize()
     DrawBubble()
+    print(bubbles)
     if mousePressed:
         FireBubble()
         
@@ -203,14 +204,14 @@ def FireBubble():
     if my < 590 and my >= 10 and mx < 594 and mx >= 10:
         if bubble > 0:
             bubble -= 1
-            angle = atan2(float(mouseY)-(position.y-15), float(mouseX)-(position.x-15));
+            angle = atan2(float(mouseY)-(position.y), float(mouseX)-(position.x));
             xSpeed = cos(angle)
             ySpeed = sin(angle)
             xSpeed *= bubbleFlySpeed
             ySpeed *= bubbleFlySpeed
         
             
-            bubbles.append(Bubble(position.x-15, position.y-15, xSpeed, ySpeed, 30))
+            bubbles.append(Bubble(position.x, position.y, xSpeed, ySpeed, 30))
 
 
 
@@ -220,7 +221,7 @@ def DrawBubble():
     translate(position.x, position.y)
     stroke(1)
     fill(unhex("ffe500e6"))
-    circle(-15, -15, 30)
+    circle(0, 0, 30)
     popMatrix()
     
     for currentBubble in bubbles:
@@ -234,11 +235,19 @@ def DrawBubble():
         
 
 
-
-#Function to create collision
-def OuterBubbles():
-    pass
-
+#Function to detect collision
+def Collision(x1, y1, x2, y2):
+    if val != 0:
+        distX = x1 - x2
+        distY = y1 - y2
+        distance = sqrt((distX*distX) + (distY*distY))
+        
+        if distance <= 50:
+            return True
+        
+        else:
+            return False
+        
 
 
 #Function to create new row in the grid
