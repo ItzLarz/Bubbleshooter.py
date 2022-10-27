@@ -1,3 +1,0 @@
-* Game Over screen
-* Checking if bubbles of same color are next to eachother
-* Collision detection
