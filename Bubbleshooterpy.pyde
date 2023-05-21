@@ -7,7 +7,7 @@ import time
 gridList = [[0]*16 for i in range(16)]
 colorsInGame = {1, 2, 3, 4, 5, 6}
 startPosition = PVector(302, 617)
-bubbleFlySpeed = 6
+bubbleFlySpeed = 8
 currentBubble = []
 canShoot = True
 gameOver = False
@@ -19,6 +19,13 @@ nextColor = random.choice(tuple(colorsInGame))
 bubbleSize = 30
 spacing = 4
 iter = 0
+
+
+# TO BE FIXED
+# - (!) Merging bubbles
+# - Menu
+# - Popanimation
+# - Out of range with full board
 
 
 class FlyingBubble:  # Flying Bubble class
@@ -37,6 +44,8 @@ class FlyingBubble:  # Flying Bubble class
     def Collision(self, slow):
         global bubbleFlySpeed
         global bubbleSize
+        global rowIndent
+        global colWidth
 
         if not slow:
             xComp = self.x
@@ -45,15 +54,55 @@ class FlyingBubble:  # Flying Bubble class
             xComp = self.xSlow
             yComp = self.ySlow
 
-        for row in gridList:
-            for statBubble in row:
+        if (yComp - bubbleSize) <= 4:
+            return True
+
+        row = int(round((yComp - colWidth) / (bubbleSize+4)))
+        if row > 15:
+            row = 15
+        elif row < 0:
+            row = 0
+
+        if rowIndent:
+            if row % 2 == 0:
+                rowWidth = 47
+            else:
+                rowWidth = 30
+
+        else:
+            if row % 2 == 0:
+                rowWidth = 30
+            else:
+                rowWidth = 47
+
+        col = int(round((xComp - rowWidth) / (bubbleSize+4)))
+        if col > 15:
+            col = 15
+        elif col < 0:
+            col = 0
+
+        relRow = -1
+        while (relRow <= 1):
+            if (relRow + row) < 0 or (relRow + row) > 15:
+                relRow += 1
+                continue
+
+            relCol = -1
+            while (relCol <= 1):
+                if (relCol + col) < 0 or (relCol + col) > 15:
+                    relCol += 1
+                    continue
+                statBubble = gridList[relRow + row][relCol + col]
                 if statBubble != 0:
                     distX = xComp - statBubble.x
                     distY = yComp - statBubble.y
                     distance = sqrt((distX**2) + (distY**2))
 
-                    if distance <= (bubbleSize-5):  # FIX COLLISION
+                    if distance <= (bubbleSize-4):
                         return True
+
+                relCol += 1
+            relRow += 1
 
         return False
 
@@ -119,9 +168,12 @@ class FlyingBubble:  # Flying Bubble class
         elif colNew < 0:
             colNew = 0
 
-        print((self.xSlow - rowWidth) / (bubbleSize+4),
-              (self.ySlow - colWidth) / (bubbleSize+4))
-        print(colNew, rowNew)
+        if gridList[rowNew][colNew] != 0:
+            print("Error, wanted to merge with:")
+            print(colNew, rowNew)
+            print((self.xSlow - rowWidth) / (bubbleSize+4),
+                  (self.ySlow - colWidth) / (bubbleSize+4))
+
         gridList[rowNew][colNew] = StatBubble(
             rowNew, colNew, (bubbleSize+4)*colNew+rowWidth, (bubbleSize+4)*rowNew+colWidth, self.val)
 
@@ -173,10 +225,20 @@ def setup():  # Startconditions
     size(800, 650)
     ellipseMode(CENTER)
     smooth()
-    frameRate(600)
+    frameRate(160)
     clear()
 
     Start()
+
+    global gridList
+    for col in range(16):
+        gridList[8][col] = 0
+        gridList[7][col] = 0
+        gridList[6][col] = 0
+        gridList[5][col] = 0
+        gridList[4][col] = 0
+        gridList[3][col] = 0
+        gridList[2][col] = 0
 
 
 def draw():  # Loopfunction
@@ -276,8 +338,6 @@ def Initialize():  # Function to initialize the game
                 stroke(1)
                 ColorAssigner(statBubble.val)
                 ellipse(statBubble.x, statBubble.y, bubbleSize, bubbleSize)
-                fill(0)
-                ellipse(statBubble.x, statBubble.y, 1, 1)
 
 
 def FireBubble():  # Function to fire bubbles
@@ -293,7 +353,7 @@ def FireBubble():  # Function to fire bubbles
     my = mouseY
     xSpeed = 0
     ySpeed = 0
-    if my < 590 and my >= 10 and mx < 594 and mx >= 10:
+    if my < 590 and my >= 10 and mx <= 580 and mx >= 10:
         canShoot = False
         angle = atan2(float(mouseY)-(startPosition.y),
                       float(mouseX)-(startPosition.x))
@@ -323,8 +383,6 @@ def DrawBubble():  # Function to draw the fired bubble every frame
         stroke(1)
         ColorAssigner(currentColor)
         ellipse(0, 0, bubbleSize, bubbleSize)
-        fill(0)
-        ellipse(0, 0, 1, 1)
         popMatrix()
 
     for bubble in currentBubble:
@@ -338,7 +396,7 @@ def DrawBubble():  # Function to draw the fired bubble every frame
             bubble.Display()
 
 
-def PopBubbles(firedBubble):
+def PopBubbles(firedBubble):  # Function to remove same colored and orphaned bubbles
     sameColor = {firedBubble}
     neighbourList = set()
 
@@ -354,40 +412,36 @@ def PopBubbles(firedBubble):
                         neighbourList.add(neighbour)
 
     if length > 2:
+        # Remove same colored bubbles
         for bubble in sameColor:
             # FIX: Popanimation
             gridList[bubble.row][bubble.col] = 0
             sameColor.remove(bubble)
 
+        # Remove orphaned bubbles
         for bubble in neighbourList:
-            print("Debug 1")
             length = 0
             recursiveList = {bubble}
             while (len(recursiveList) > length):
                 length = len(recursiveList)
-                print("Debug a")
                 for neighbour in recursiveList:
-                    print("Debug b")
                     for recNeighbour in neighbour.CheckNeighbours():
                         if recNeighbour != 0:
-                            print("Debug c")
                             recursiveList.add(recNeighbour)
 
-            print("Debug 3")
             attached = False
             for neighbour in recursiveList:
-                print("Debug 4")
                 if (neighbour.row == 0):
-                    print("Debug 7")
                     attached = True
                     break
 
             for neighbour in recursiveList:
-                print("Debug 5")
                 if not attached:
-                    print("Debug 6")
                     gridList[neighbour.row][neighbour.col] = 0
                 neighbourList.discard(neighbour)
+
+        # Check if player won the game
+        CheckGameOver()
 
 
 def NewRow():  # Function to create new row in the grid
@@ -416,6 +470,8 @@ def NewRow():  # Function to create new row in the grid
 
         gridList.insert(0, tempRow)
 
+    CheckGameOver()
+
 
 def CheckColorsInGame():  # Function to check which colors are still in the game
     currentColorsInGame = set()
@@ -433,6 +489,9 @@ def CheckColorsInGame():  # Function to check which colors are still in the game
 
 
 def CheckGameOver():  # Function to check if player is Game Over
+    global gameOver
+    global canShoot
+
     win = True
     for col in range(16):
         if gridList[15][col] != 0:
