@@ -1,10 +1,10 @@
-# Dependencies
+# Libraries
 import random
 import time
 
 
 # Variables
-gridList = [[0]*16 for i in range(16)]
+gridList = [[0] * 16 for i in range(16)]
 colorsInGame = {1, 2, 3, 4, 5, 6}
 startPosition = PVector(302, 617)
 bubbleFlySpeed = 8
@@ -25,7 +25,8 @@ iter = 0
 # - (!) Merging bubbles
 # - Menu
 # - Popanimation
-# - Out of range with full board
+# - New row mechanic
+# - Canvas y size
 
 
 class FlyingBubble:  # Flying Bubble class
@@ -57,7 +58,7 @@ class FlyingBubble:  # Flying Bubble class
         if (yComp - bubbleSize) <= 4:
             return True
 
-        row = int(round((yComp - colWidth) / (bubbleSize+4)))
+        row = int(round((yComp - colWidth) / (bubbleSize + 4)))
         if row > 15:
             row = 15
         elif row < 0:
@@ -75,20 +76,20 @@ class FlyingBubble:  # Flying Bubble class
             else:
                 rowWidth = 47
 
-        col = int(round((xComp - rowWidth) / (bubbleSize+4)))
+        col = int(round((xComp - rowWidth) / (bubbleSize + 4)))
         if col > 15:
             col = 15
         elif col < 0:
             col = 0
 
         relRow = -1
-        while (relRow <= 1):
+        while relRow <= 1:
             if (relRow + row) < 0 or (relRow + row) > 15:
                 relRow += 1
                 continue
 
             relCol = -1
-            while (relCol <= 1):
+            while relCol <= 1:
                 if (relCol + col) < 0 or (relCol + col) > 15:
                     relCol += 1
                     continue
@@ -98,7 +99,7 @@ class FlyingBubble:  # Flying Bubble class
                     distY = yComp - statBubble.y
                     distance = sqrt((distX**2) + (distY**2))
 
-                    if distance <= (bubbleSize-4):
+                    if distance <= (bubbleSize - 4):
                         return True
 
                 relCol += 1
@@ -122,8 +123,8 @@ class FlyingBubble:  # Flying Bubble class
     def SlowMove(self):
         global bubbleFlySpeed
 
-        self.xSlow += self.xSpeed/bubbleFlySpeed * self.dir
-        self.ySlow += self.ySpeed/bubbleFlySpeed
+        self.xSlow += self.xSpeed / bubbleFlySpeed * self.dir
+        self.ySlow += self.ySpeed / bubbleFlySpeed
 
         if self.Collision(True):
             self.Teleport()
@@ -144,7 +145,7 @@ class FlyingBubble:  # Flying Bubble class
 
         currentBubble.remove(self)
 
-        rowNew = int(round((self.ySlow - colWidth) / (bubbleSize+4)))
+        rowNew = int(round((self.ySlow - colWidth) / (bubbleSize + 4)))
         if rowNew > 15:
             rowNew = 15
         elif rowNew < 0:
@@ -162,7 +163,7 @@ class FlyingBubble:  # Flying Bubble class
             else:
                 rowWidth = 47
 
-        colNew = int(round((self.xSlow - rowWidth) / (bubbleSize+4)))
+        colNew = int(round((self.xSlow - rowWidth) / (bubbleSize + 4)))
         if colNew > 15:
             colNew = 15
         elif colNew < 0:
@@ -171,11 +172,18 @@ class FlyingBubble:  # Flying Bubble class
         if gridList[rowNew][colNew] != 0:
             print("Error, wanted to merge with:")
             print(colNew, rowNew)
-            print((self.xSlow - rowWidth) / (bubbleSize+4),
-                  (self.ySlow - colWidth) / (bubbleSize+4))
+            print(
+                (self.xSlow - rowWidth) / (bubbleSize + 4),
+                (self.ySlow - colWidth) / (bubbleSize + 4),
+            )
 
         gridList[rowNew][colNew] = StatBubble(
-            rowNew, colNew, (bubbleSize+4)*colNew+rowWidth, (bubbleSize+4)*rowNew+colWidth, self.val)
+            rowNew,
+            colNew,
+            (bubbleSize + 4) * colNew + rowWidth,
+            (bubbleSize + 4) * rowNew + colWidth,
+            self.val,
+        )
 
         PopBubbles(gridList[rowNew][colNew])
 
@@ -194,29 +202,42 @@ class StatBubble:  # Stationary Bubble class
 
         neighbours = set()
 
+        rowU = self.row - 1
+        rowD = self.row + 1
+        colL = self.col - 1
+        colR = self.col + 1
+
+        if rowU == -1:
+            rowU = 0
+
+        elif rowD == 16:
+            rowD = 15
+
+        if colL == -1:
+            colL = 0
+
+        elif colR == 16:
+            colR = 15
+
         if self.row > 0:
-            neighbours.add(gridList[self.row-1][self.col])       # Above
+            neighbours.add(gridList[rowU][self.col])  # Above
 
         if self.row < 15:
-            neighbours.add(gridList[self.row+1][self.col])       # Below
+            neighbours.add(gridList[rowD][self.col])  # Below
 
         if self.col > 0:
-            neighbours.add(gridList[self.row][self.col-1])       # Left
+            neighbours.add(gridList[self.row][colL])  # Left
 
-            if (int(rowIndent == True) + self.row) % 2 == 0:        # Row Not Indented
-                neighbours.add(
-                    gridList[self.row-1][self.col-1])               # Left Above
-                neighbours.add(
-                    gridList[self.row+1][self.col-1])               # Left Below
+            if (int(rowIndent == True) + self.row) % 2 == 0:  # Row Not Indented
+                neighbours.add(gridList[rowU][colL])  # Left Above
+                neighbours.add(gridList[rowD][colL])  # Left Below
 
         if self.col < 15:
-            neighbours.add(gridList[self.row][self.col+1])       # Right
+            neighbours.add(gridList[self.row][colR])  # Right
 
-            if (int(rowIndent == True) + self.row) % 2 != 0:        # Row Indented
-                neighbours.add(
-                    gridList[self.row-1][self.col+1])               # Right Above
-                neighbours.add(
-                    gridList[self.row+1][self.col+1])               # Right Below
+            if (int(rowIndent == True) + self.row) % 2 != 0:  # Row Indented
+                neighbours.add(gridList[rowU][colR])  # Right Above
+                neighbours.add(gridList[rowD][colR])  # Right Below
 
         return neighbours
 
@@ -230,15 +251,15 @@ def setup():  # Startconditions
 
     Start()
 
-    global gridList
-    for col in range(16):
-        gridList[8][col] = 0
-        gridList[7][col] = 0
-        gridList[6][col] = 0
-        gridList[5][col] = 0
-        gridList[4][col] = 0
-        gridList[3][col] = 0
-        gridList[2][col] = 0
+    # global gridList
+    # for col in range(16):
+    #     gridList[8][col] = 0
+    #     gridList[7][col] = 0
+    #     gridList[6][col] = 0
+    #     gridList[5][col] = 0
+    #     gridList[4][col] = 0
+    #     gridList[3][col] = 0
+    #     gridList[2][col] = 0
 
 
 def draw():  # Loopfunction
@@ -257,8 +278,14 @@ def draw():  # Loopfunction
         DrawBubble()
 
     if mousePressed:
-        if canShoot:
-            FireBubble()
+        mx = mouseX
+        my = mouseY
+
+        if my < 590 and my >= 10 and mx <= 580 and mx >= 10 and canShoot:
+            FireBubble(mx, my)
+            time.sleep(0.1)
+
+        # elif for buttons
 
     if keyPressed:
         if key == " ":
@@ -270,6 +297,7 @@ def draw():  # Loopfunction
             gameOver = False
             canShoot = True
             Start()
+            time.sleep(0.1)
 
 
 def Start():  # Function to fill the grid at the start of a game
@@ -287,8 +315,13 @@ def Start():  # Function to fill the grid at the start of a game
             rowIndent = True
 
         for col in range(16):
-            gridList[row][col] = StatBubble(row, col, (bubbleSize+4)*col+rowWidth,
-                                            (bubbleSize+4)*row+colWidth, random.choice(tuple(colorsInGame)))
+            gridList[row][col] = StatBubble(
+                row,
+                col,
+                (bubbleSize + 4) * col + rowWidth,
+                (bubbleSize + 4) * row + colWidth,
+                random.choice(tuple(colorsInGame)),
+            )
 
     for row in range(9, 16):
         for col in range(16):
@@ -307,8 +340,8 @@ def Initialize():  # Function to initialize the game
     strokeWeight(1)
     x = 10
     while x < 580:
-        stroke(-(x+590 >> 1 & 1))
-        line(x, 590, x+5, 590)
+        stroke(-(x + 590 >> 1 & 1))
+        line(x, 590, x + 5, 590)
         x += 6
 
     fill(unhex("ffc1c0ff"))
@@ -333,40 +366,42 @@ def Initialize():  # Function to initialize the game
             if statBubble != 0:
                 statBubble.row = i
                 statBubble.col = j
-                statBubble.x = (bubbleSize+4)*j+rowWidth
-                statBubble.y = (bubbleSize+4)*i+colWidth
+                statBubble.x = (bubbleSize + 4) * j + rowWidth
+                statBubble.y = (bubbleSize + 4) * i + colWidth
                 stroke(1)
                 ColorAssigner(statBubble.val)
                 ellipse(statBubble.x, statBubble.y, bubbleSize, bubbleSize)
 
 
-def FireBubble():  # Function to fire bubbles
+def FireBubble(mouseX, mouseY):  # Function to fire bubbles
     global currentBubble
     global canShoot
     global currentColor
-    global nextColor
     global startPosition
     global bubbleSize
     global bubbleFlySpeed
 
-    mx = mouseX
-    my = mouseY
     xSpeed = 0
     ySpeed = 0
-    if my < 590 and my >= 10 and mx <= 580 and mx >= 10:
-        canShoot = False
-        angle = atan2(float(mouseY)-(startPosition.y),
-                      float(mouseX)-(startPosition.x))
-        xSpeed = cos(angle)
-        ySpeed = sin(angle)
-        xSpeed *= bubbleFlySpeed
-        ySpeed *= bubbleFlySpeed
+    canShoot = False
+    angle = atan2(float(mouseY) - (startPosition.y), float(mouseX) - (startPosition.x))
+    xSpeed = cos(angle)
+    ySpeed = sin(angle)
+    xSpeed *= bubbleFlySpeed
+    ySpeed *= bubbleFlySpeed
 
-        currentBubble.append(FlyingBubble(
-            startPosition.x, startPosition.y, startPosition.x, startPosition.y, xSpeed, ySpeed, bubbleSize, currentColor))
-        currentColor = nextColor
-        CheckColorsInGame()
-        nextColor = random.choice(tuple(colorsInGame))
+    currentBubble.append(
+        FlyingBubble(
+            startPosition.x,
+            startPosition.y,
+            startPosition.x,
+            startPosition.y,
+            xSpeed,
+            ySpeed,
+            bubbleSize,
+            currentColor,
+        )
+    )
 
 
 def DrawBubble():  # Function to draw the fired bubble every frame
@@ -377,13 +412,17 @@ def DrawBubble():  # Function to draw the fired bubble every frame
     global startPosition
     global bubbleSize
 
+    pushMatrix()
+    translate(startPosition.x, startPosition.y)
+    stroke(1)
+
     if canShoot:
-        pushMatrix()
-        translate(startPosition.x, startPosition.y)
-        stroke(1)
         ColorAssigner(currentColor)
         ellipse(0, 0, bubbleSize, bubbleSize)
-        popMatrix()
+
+    ColorAssigner(nextColor)
+    ellipse(-270, 0, bubbleSize, bubbleSize)
+    popMatrix()
 
     for bubble in currentBubble:
         if bubble.Collision(False):
@@ -397,11 +436,14 @@ def DrawBubble():  # Function to draw the fired bubble every frame
 
 
 def PopBubbles(firedBubble):  # Function to remove same colored and orphaned bubbles
+    global currentColor
+    global nextColor
+
     sameColor = {firedBubble}
     neighbourList = set()
 
     length = 0
-    while (len(sameColor) > length):
+    while len(sameColor) > length:
         length = len(sameColor)
         for bubble in sameColor:
             for neighbour in bubble.CheckNeighbours():
@@ -422,7 +464,7 @@ def PopBubbles(firedBubble):  # Function to remove same colored and orphaned bub
         for bubble in neighbourList:
             length = 0
             recursiveList = {bubble}
-            while (len(recursiveList) > length):
+            while len(recursiveList) > length:
                 length = len(recursiveList)
                 for neighbour in recursiveList:
                     for recNeighbour in neighbour.CheckNeighbours():
@@ -431,7 +473,7 @@ def PopBubbles(firedBubble):  # Function to remove same colored and orphaned bub
 
             attached = False
             for neighbour in recursiveList:
-                if (neighbour.row == 0):
+                if neighbour.row == 0:
                     attached = True
                     break
 
@@ -440,8 +482,10 @@ def PopBubbles(firedBubble):  # Function to remove same colored and orphaned bub
                     gridList[neighbour.row][neighbour.col] = 0
                 neighbourList.discard(neighbour)
 
-        # Check if player won the game
-        CheckGameOver()
+    CheckGameOver()
+    currentColor = nextColor
+    CheckColorsInGame()
+    nextColor = random.choice(tuple(colorsInGame))
 
 
 def NewRow():  # Function to create new row in the grid
@@ -465,8 +509,12 @@ def NewRow():  # Function to create new row in the grid
         tempRow = [0] * 16
         for col in range(16):
             tempRow[col] = StatBubble(
-                0, col, (bubbleSize+4)*col +
-                rowWidth, colWidth, random.choice(tuple(colorsInGame)))
+                0,
+                col,
+                (bubbleSize + 4) * col + rowWidth,
+                colWidth,
+                random.choice(tuple(colorsInGame)),
+            )
 
         gridList.insert(0, tempRow)
 
@@ -497,6 +545,7 @@ def CheckGameOver():  # Function to check if player is Game Over
         if gridList[15][col] != 0:
             gameOver = True
             canShoot = False
+            print("lost")
             GameOverScreen("lost")
             break
 
@@ -515,20 +564,20 @@ def GameOverScreen(state):  # Function to display the Game Over screen
         fill(100, 100, 100)
         textFont(loadFont("TimesNewRomanPSMT-48.vlw"), 60)
         textAlign(CENTER, CENTER)
-        text("YOU WON!", width/2, height/2)
+        text("YOU WON!", width / 2, height / 2)
         textFont(loadFont("TimesNewRomanPSMT-48.vlw"), 20)
         textAlign(CENTER, CENTER)
-        text("(With a score of " + str(score) + ")", width/2, 400)
+        text("(With a score of " + str(score) + ")", width / 2, 400)
 
     elif state == "lost":
         background(0)
         fill(79, 0, 0)
         textFont(loadFont("TimesNewRomanPSMT-48.vlw"), 60)
         textAlign(CENTER, CENTER)
-        text("YOU DIED", width/2, height/2)
+        text("YOU DIED", width / 2, height / 2)
         textFont(loadFont("TimesNewRomanPSMT-48.vlw"), 20)
         textAlign(CENTER, CENTER)
-        text("(With a score of " + str(score) + ")", width/2, 400)
+        text("(With a score of " + str(score) + ")", width / 2, 400)
 
 
 def ColorAssigner(value):  # Function to decode values into hexes
@@ -560,5 +609,4 @@ def ColorAssigner(value):  # Function to decode values into hexes
         fill(unhex("ff02fafa"))
 
     else:
-        raise Exception("Encountered value " +
-                        str(value) + " while initializing")
+        raise Exception("Encountered value " + str(value) + " while initializing")
