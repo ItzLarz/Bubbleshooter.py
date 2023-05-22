@@ -296,6 +296,7 @@ def draw():  # Loopfunction
         if key == "r":
             gameOver = False
             canShoot = True
+            colorsInGame = {1, 2, 3, 4, 5, 6}
             Start()
             time.sleep(0.1)
 
